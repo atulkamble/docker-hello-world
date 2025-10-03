@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: hello-web-svc
 spec:
-  type: LoabBalancer
+  type: LoadBalancer
   selector: { app: hello-web }
   ports:
     - port: 80
