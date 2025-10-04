@@ -1,8 +1,9 @@
 // create aks cluster 
 
 1. open terminal/powershell 
-
+```
 az login 
+```
 // select subscription 
 
 2. paste following command 
@@ -44,7 +45,10 @@ kubectl get deployments
 kubectl get pods 
 kubectl get services
 kubectl get service hello-web-svc
-
+```
 // copy external ip and paste in browser 
 
+// delete cluster
+```
+az aks delete --name mycluster --resource-group DevOps
 ```
