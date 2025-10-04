@@ -1,133 +1,168 @@
-# Docker Hello World - Nginx Static Site
+# Docker Hello World
 
-A simple containerized static website using Nginx that demonstrates basic Docker concepts.
+A simple Docker project that serves a static HTML website using nginx alpine image.
 
-## 🚀 Features
-
-- Lightweight Nginx Alpine image
-- Simple HTML static site
-- Docker Compose setup
-- Kubernetes deployment ready
-- Multi-platform Docker image
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 docker-hello-world/
 ├── Dockerfile
-├── html/index.html
-├── docker-compose.yml
-├── k8s/
-│   ├── deployment.yaml
-│   └── service.yaml
+├── html/
+│   └── (HTML files)
 └── README.md
 ```
 
-## 🛠️ Quick Start
+## Prerequisites
 
-### Using Docker Compose
+- Docker installed on your system
+- Basic knowledge of Docker commands
+- Minikube (optional, for Kubernetes deployment)
+- kubectl (optional, for Kubernetes management)
+
+## Getting Started
+
+### Docker Deployment
+
+#### Build the Docker Image
 
 ```bash
-# Clone the repository
-git clone https://github.com/atulkamble/docker-hello-world.git
-cd docker-hello-world
-
-# Run with Docker Compose
-docker compose up -d
-
-# View the site
-open http://localhost:80
+docker build -t hello-world-app .
 ```
 
-### Using Docker directly
+#### Run the Container (Development)
 
 ```bash
-# Build the image
-docker build -t atuljkamble/docker-hello-world:latest .
+# Run in foreground with logs
+docker run -p 8080:80 --name hello-world hello-world-app
 
-# Run the container
-docker run -d -p 80:80 atuljkamble/docker-hello-world:latest
+# Run in background (detached mode)
+docker run -d -p 8080:80 --name hello-world hello-world-app
+
+# Run with custom port mapping
+docker run -d -p 3000:80 --name hello-world hello-world-app
 ```
 
-### Using Kubernetes
+#### Access the Application
+
+Open your web browser and navigate to:
+```
+http://localhost:8080
+```
+
+### Kubernetes/Minikube Deployment
+
+#### Start Minikube
 
 ```bash
-# Apply Kubernetes manifests
-kubectl apply -f k8s/
+# Start minikube cluster
+minikube start
 
-# Check the service
+# Enable ingress addon (optional)
+minikube addons enable ingress
+
+# Use minikube docker daemon
+eval $(minikube docker-env)
+```
+
+#### Build Image in Minikube
+
+```bash
+# Build image in minikube's docker environment
+docker build -t hello-world-app .
+```
+
+#### Deploy to Kubernetes
+
+```bash
+# Create deployment
+kubectl create deployment hello-world --image=hello-world-app --port=80
+
+# Set image pull policy to Never (for local images)
+kubectl patch deployment hello-world -p '{"spec":{"template":{"spec":{"containers":[{"name":"hello-world-app","imagePullPolicy":"Never"}]}}}}'
+
+# Expose the deployment
+kubectl expose deployment hello-world --type=NodePort --port=80
+
+# Get service URL
+minikube service hello-world --url
+```
+
+#### Alternative: Using YAML manifests
+
+Create deployment and service with kubectl apply:
+
+```bash
+# Create deployment.yaml and service.yaml files, then:
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+```
+
+#### Kubernetes Management Commands
+
+```bash
+# View deployments
+kubectl get deployments
+
+# View pods
+kubectl get pods
+
+# View services
 kubectl get services
 
-# Access via NodePort (if using local cluster)
-# http://localhost:30080
+# Scale deployment
+kubectl scale deployment hello-world --replicas=3
+
+# Delete deployment
+kubectl delete deployment hello-world
+
+# Delete service
+kubectl delete service hello-world
+
+# Stop minikube
+minikube stop
+
+# Delete minikube cluster
+minikube delete
 ```
 
-## 🏗️ Build & Push to Docker Hub
+## Docker Commands
 
+### Stop the container
 ```bash
-# Build multi-platform image
-docker buildx build --platform linux/amd64,linux/arm64 \
-  -t atuljkamble/docker-hello-world:latest \
-  -t atuljkamble/docker-hello-world:v1.0.0 \
-  --push .
+docker stop hello-world
 ```
 
-## 🧪 Testing
-
+### Remove the container
 ```bash
-# Test the running container
-curl http://localhost:80
-
-# Expected response: HTML page with "Hello, Cloudnautic!"
+docker rm hello-world
 ```
 
-## 🔧 Configuration
-
-- **Port**: 80 (HTTP)
-- **Base Image**: nginx:alpine
-- **Content**: Static HTML files in `/html` directory
-
-## 📦 Docker Image
-
-- **Registry**: Docker Hub
-- **Repository**: `atuljkamble/docker-hello-world`
-- **Tags**: `latest`, `v1.0.0`
-
-## 🚀 Deployment Options
-
-### Local Development
+### Remove the image
 ```bash
-docker compose up -d
+docker rmi hello-world-app
 ```
 
-### Production (Kubernetes)
+### View running containers
 ```bash
-kubectl apply -f k8s/
+docker ps
 ```
 
-### Cloud Platforms
-- AWS ECS/EKS
-- Azure Container Instances/AKS
-- Google Cloud Run/GKE
+## Features
 
-## 🤝 Contributing
+- Lightweight nginx alpine base image
+- Serves static HTML content
+- Exposes port 80 inside container
+- Maps to port 8080 on host machine
+- Kubernetes/Minikube ready for container orchestration
+
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+3. Make your changes
+4. Test the Docker build
+5. Submit a pull request
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License.
-
-## 🌟 Cloudnautic
-
-Part of the Docker Build Projects Pack by Cloudnautic - Ready-to-deploy containerized applications.
-
----
-
-**Author**: Atul Kamble  
-**Docker Hub**: [atuljkamble/docker-hello-world](https://hub.docker.com/r/atuljkamble/docker-hello-world)  
-**GitHub**: [atulkamble/docker-hello-world](https://github.com/atulkamble/docker-hello-world)
+This project is open source and available under the MIT License.
