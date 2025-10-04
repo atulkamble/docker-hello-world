@@ -5,17 +5,12 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels:
-      app: hello-web
+    matchLabels: { app: hello-web }
   template:
     metadata:
-      labels:
-        app: hello-web
+      labels: { app: hello-web }
     spec:
       containers:
         - name: nginx
           image: atuljkamble/docker-hello-world:v1.0.0
-          ports:
-            - containerPort: 80
-          command: ["nginx"]
-          args: ["-g", "daemon off;"]
+          ports: [{ containerPort: 80 }]
