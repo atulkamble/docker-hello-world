@@ -9,7 +9,9 @@ docker-hello-world/
 ├── Dockerfile
 ├── html/
 │   └── (HTML files)
-└── README.md
+├── README.md
+├── eks.sh
+└── aks.sh
 ```
 
 ## Prerequisites
@@ -18,6 +20,8 @@ docker-hello-world/
 - Basic knowledge of Docker commands
 - Minikube (optional, for Kubernetes deployment)
 - kubectl (optional, for Kubernetes management)
+- AWS CLI and eksctl (for EKS deployment)
+- Azure CLI (for AKS deployment)
 
 ## Getting Started
 
@@ -124,6 +128,85 @@ minikube stop
 # Delete minikube cluster
 minikube delete
 ```
+
+## Cloud Deployments
+
+### Amazon EKS Deployment
+
+#### Prerequisites for EKS
+- AWS CLI installed and configured
+- eksctl installed
+- kubectl installed
+- Docker installed
+- Appropriate AWS permissions for EKS, ECR, and IAM
+
+#### Deploy to EKS
+
+```bash
+# Make the script executable
+chmod +x eks.sh
+
+# Run the EKS deployment script
+./eks.sh
+```
+
+The script will:
+1. Create an ECR repository
+2. Build and push the Docker image to ECR
+3. Create an EKS cluster with managed node group
+4. Deploy the application
+5. Expose it via LoadBalancer service
+
+#### Cleanup EKS Resources
+
+```bash
+# Delete the EKS cluster and all resources
+eksctl delete cluster --name hello-world-cluster --region us-west-2
+
+# Delete ECR repository
+aws ecr delete-repository --repository-name hello-world-app --region us-west-2 --force
+```
+
+### Azure AKS Deployment
+
+#### Prerequisites for AKS
+- Azure CLI installed and configured
+- kubectl installed
+- Docker installed
+- Appropriate Azure permissions for AKS, ACR, and resource groups
+
+#### Deploy to AKS
+
+```bash
+# Make the script executable
+chmod +x aks.sh
+
+# Run the AKS deployment script
+./aks.sh
+```
+
+The script will:
+1. Create a resource group
+2. Create an Azure Container Registry (ACR)
+3. Build and push the Docker image to ACR
+4. Create an AKS cluster
+5. Deploy the application
+6. Expose it via LoadBalancer service
+
+#### Cleanup AKS Resources
+
+```bash
+# Delete the entire resource group (includes AKS cluster and ACR)
+az group delete --name hello-world-rg --yes --no-wait
+```
+
+### Cloud Deployment Notes
+
+- **EKS**: Uses AWS ECR for container registry and creates a LoadBalancer service
+- **AKS**: Uses Azure Container Registry and creates a LoadBalancer service
+- Both scripts include error handling and prerequisite checks
+- Deployment typically takes 10-15 minutes for cluster creation
+- Both scripts output the external IP address to access your application
 
 ## Docker Commands
 
