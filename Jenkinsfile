@@ -64,11 +64,27 @@ pipeline {
             }
             steps {
                 script {
-                    // Add your staging deployment logic
-                    sh '''
-                        echo "Deploying to staging environment"
-                        # kubectl set image deployment/hello-world hello-world=${REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}
-                    '''
+                    withCredentials([kubeconfigFile(credentialsId: 'kubeconfig-staging', variable: 'KUBECONFIG')]) {
+                        sh '''
+                            echo "Deploying to staging environment"
+                            chmod +x scripts/deploy-staging.sh
+                            export REGISTRY=${REGISTRY}
+                            export IMAGE_NAME=${DOCKER_IMAGE}
+                            ./scripts/deploy-staging.sh ${DOCKER_TAG}
+                        '''
+                    }
+                }
+            }
+            post {
+                success {
+                    slackSend channel: '#deployments', 
+                             color: 'good', 
+                             message: "✅ Staging deployment successful! Image: ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                }
+                failure {
+                    slackSend channel: '#deployments', 
+                             color: 'danger', 
+                             message: "❌ Staging deployment failed! Build: ${env.BUILD_URL}"
                 }
             }
         }
@@ -78,13 +94,37 @@ pipeline {
                 branch 'main'
             }
             steps {
-                input message: 'Deploy to production?', ok: 'Deploy'
+                input message: 'Deploy to production?', ok: 'Deploy',
+                      submitterParameter: 'DEPLOYER'
                 script {
-                    // Add your production deployment logic
-                    sh '''
-                        echo "Deploying to production environment"
-                        # kubectl set image deployment/hello-world hello-world=${REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}
-                    '''
+                    withCredentials([kubeconfigFile(credentialsId: 'kubeconfig-production', variable: 'KUBECONFIG')]) {
+                        sh '''
+                            echo "Deploying to production environment"
+                            echo "Deployer: ${DEPLOYER}"
+                            chmod +x scripts/deploy-production.sh
+                            export REGISTRY=${REGISTRY}
+                            export IMAGE_NAME=${DOCKER_IMAGE}
+                            ./scripts/deploy-production.sh ${DOCKER_TAG}
+                        '''
+                    }
+                }
+            }
+            post {
+                success {
+                    slackSend channel: '#deployments', 
+                             color: 'good', 
+                             message: "🚀 Production deployment successful! Image: ${DOCKER_IMAGE}:${DOCKER_TAG} by ${env.DEPLOYER}"
+                    emailext subject: "Production Deployment Successful",
+                             body: "Successfully deployed ${DOCKER_IMAGE}:${DOCKER_TAG} to production by ${env.DEPLOYER}",
+                             to: "team@company.com"
+                }
+                failure {
+                    slackSend channel: '#deployments', 
+                             color: 'danger', 
+                             message: "💥 Production deployment failed! Build: ${env.BUILD_URL}"
+                    emailext subject: "Production Deployment Failed",
+                             body: "Production deployment failed. Check console output at ${env.BUILD_URL}",
+                             to: "team@company.com"
                 }
             }
         }

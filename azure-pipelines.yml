@@ -113,10 +113,32 @@ stages:
       runOnce:
         deploy:
           steps:
+          - task: KubectlInstaller@0
+            displayName: 'Install kubectl'
+            inputs:
+              kubectlVersion: 'latest'
+
+          - task: Kubernetes@1
+            displayName: 'Set kubectl context'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceEndpoint: 'staging-k8s-connection'
+              command: 'login'
+
           - script: |
-              echo "Deploying to staging environment"
-              # Add your staging deployment commands here
+              chmod +x scripts/deploy-staging.sh
+              export REGISTRY=$(containerRegistry)
+              export IMAGE_NAME=$(imageRepository)
+              ./scripts/deploy-staging.sh $(tag)
             displayName: 'Deploy to Staging'
+
+          - task: Kubernetes@1
+            displayName: 'Get staging service status'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceEndpoint: 'staging-k8s-connection'
+              command: 'get'
+              arguments: 'services -n staging'
 
 - stage: DeployProduction
   displayName: Deploy to Production
@@ -132,7 +154,37 @@ stages:
       runOnce:
         deploy:
           steps:
+          - task: KubectlInstaller@0
+            displayName: 'Install kubectl'
+            inputs:
+              kubectlVersion: 'latest'
+
+          - task: Kubernetes@1
+            displayName: 'Set kubectl context'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceEndpoint: 'production-k8s-connection'
+              command: 'login'
+
           - script: |
-              echo "Deploying to production environment"
-              # Add your production deployment commands here
+              chmod +x scripts/deploy-production.sh
+              export REGISTRY=$(containerRegistry)
+              export IMAGE_NAME=$(imageRepository)
+              ./scripts/deploy-production.sh $(tag)
             displayName: 'Deploy to Production'
+
+          - task: Kubernetes@1
+            displayName: 'Verify production deployment'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceEndpoint: 'production-k8s-connection'
+              command: 'get'
+              arguments: 'pods,services,ingress -n production'
+
+          - task: SlackNotification@1
+            displayName: 'Notify Slack of successful deployment'
+            inputs:
+              SlackApiToken: '$(slack-api-token)'
+              Channel: '#deployments'
+              Message: '🚀 Production deployment successful! Version: $(tag) is now live at https://hello-world.example.com'
+            condition: succeeded()
