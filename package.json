@@ -1,0 +1,46 @@
+{
+  "name": "docker-hello-world",
+  "version": "1.0.0",
+  "description": "A simple Docker project that serves a static HTML website using nginx alpine image",
+  "main": "index.html",
+  "scripts": {
+    "build": "docker build -t hello-world-app .",
+    "start": "docker run -d -p 8080:80 --name hello-world hello-world-app",
+    "stop": "docker stop hello-world && docker rm hello-world",
+    "test": "docker run -d -p 8080:80 --name test-container hello-world-app:test && sleep 5 && curl -f http://localhost:8080 && docker stop test-container && docker rm test-container",
+    "clean": "docker rmi hello-world-app",
+    "logs": "docker logs hello-world",
+    "shell": "docker exec -it hello-world /bin/sh",
+    "deploy:minikube": "eval $(minikube docker-env) && npm run build && kubectl create deployment hello-world --image=hello-world-app && kubectl expose deployment hello-world --type=NodePort --port=80",
+    "deploy:eks": "chmod +x eks.sh && ./eks.sh",
+    "deploy:aks": "chmod +x aks.sh && ./aks.sh",
+    "release": "npm version patch && git push --tags"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/docker-hello-world.git"
+  },
+  "keywords": [
+    "docker",
+    "nginx",
+    "kubernetes",
+    "hello-world",
+    "containerization",
+    "devops",
+    "cicd"
+  ],
+  "author": "Atul",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourusername/docker-hello-world/issues"
+  },
+  "homepage": "https://github.com/yourusername/docker-hello-world#readme",
+  "devDependencies": {
+    "prettier": "^3.0.0",
+    "eslint": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}

@@ -6,10 +6,17 @@ A simple Docker project that serves a static HTML website using nginx alpine ima
 
 ```
 docker-hello-world/
-├── Dockerfile
+├── .github/
+│   └── workflows/
+│       └── ci-cd.yml
 ├── html/
 │   └── (HTML files)
+├── Dockerfile
 ├── README.md
+├── LICENSE
+├── package.json
+├── Jenkinsfile
+├── azure-pipelines.yml
 ├── eks.sh
 └── aks.sh
 ```
@@ -207,6 +214,104 @@ az group delete --name hello-world-rg --yes --no-wait
 - Both scripts include error handling and prerequisite checks
 - Deployment typically takes 10-15 minutes for cluster creation
 - Both scripts output the external IP address to access your application
+
+## CI/CD Pipelines
+
+### GitHub Actions
+
+The project includes a comprehensive GitHub Actions workflow that:
+- Runs tests on every push and pull request
+- Builds and pushes Docker images to GitHub Container Registry
+- Deploys to staging on develop branch
+- Deploys to production on releases
+
+#### Setting up GitHub Actions
+
+1. Push your code to GitHub
+2. The workflow will automatically trigger on pushes to main/develop branches
+3. For container registry access, ensure GitHub Actions has package write permissions
+
+### Jenkins Pipeline
+
+The Jenkinsfile provides a complete Jenkins pipeline with:
+- Automated builds and testing
+- Security scanning with Trivy
+- Multi-environment deployments
+- Email notifications on failures
+
+#### Setting up Jenkins
+
+1. Install required plugins: Docker, Pipeline, Email Extension
+2. Configure Docker registry credentials
+3. Set up webhook or polling for automatic builds
+
+### Azure DevOps Pipeline
+
+The Azure pipeline configuration includes:
+- Multi-stage builds with security scanning
+- Automated testing and deployment
+- Environment-specific deployments
+
+#### Setting up Azure DevOps
+
+1. Create a new pipeline in Azure DevOps
+2. Connect to your repository
+3. Configure service connections for container registry
+4. Set up environments for staging and production
+
+## NPM Scripts
+
+The project includes convenient npm scripts for common tasks:
+
+```bash
+# Build Docker image
+npm run build
+
+# Start container
+npm run start
+
+# Stop and remove container
+npm run stop
+
+# Run tests
+npm run test
+
+# Deploy to cloud platforms
+npm run deploy:eks
+npm run deploy:aks
+npm run deploy:minikube
+
+# Create a new release
+npm run release
+```
+
+## Release Management
+
+### Creating Releases
+
+1. **Manual Release:**
+   ```bash
+   npm run release
+   git push origin main --tags
+   ```
+
+2. **GitHub Release:**
+   - Go to GitHub repository
+   - Click "Releases" → "Create a new release"
+   - Choose a tag version (e.g., v1.0.0)
+   - Add release notes
+   - Publish release
+
+3. **Automated Release:**
+   - Push to main branch triggers automatic deployment
+   - Tags trigger production deployments
+
+### Versioning
+
+This project follows [Semantic Versioning](https://semver.org/):
+- **MAJOR** version for incompatible changes
+- **MINOR** version for backwards-compatible functionality
+- **PATCH** version for backwards-compatible bug fixes
 
 ## Docker Commands
 
