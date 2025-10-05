@@ -12,5 +12,5 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: atulkamble2.azurecr.io/cloudnautic/hello-world:latest
+          image: atulkamble.azurecr.io/samples/hello-world:latest
           ports: [{ containerPort: 80 }]
